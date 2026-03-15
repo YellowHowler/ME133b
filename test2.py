@@ -132,7 +132,9 @@ class Node:
         self.y = float(y)
         self.t = float(t)
         self.parent = None
+        self.child = None
         self.map = map
+        self.cost = 0
 
     def distance(self, other):
         return sqrt((self.x - other.x)**2 + (self.y - other.y)**2)
@@ -311,6 +313,125 @@ def rrt(start, goal, visual):
 
     return None, tree
 
+# Temporal RRT*
+def rrtstar(start, goal, visual):
+    map = visual.map
+
+    tree = [start]
+    steps = 0
+
+    def addToTree(oldn, newn):
+        newn.parent = oldn
+        newn.cost = oldn.cost + newn.distance(oldn)
+        oldn.child = newn
+        tree.append(newn)
+
+        visual.drawEdge(oldn, newn, color='g', linewidth=1)
+        visual.show()
+
+    def getNeighbors(node, r):
+        neighbors = []
+        for otherNode in tree:
+            if otherNode.distance(node) <= r:
+                neighbors.append(otherNode)
+
+        return neighbors
+    
+    def updateChildrenCosts(node):
+        child = node.child
+        if child is not None:
+            child.cost = node.cost + node.distance(child)
+            updateChildrenCosts(node.child)
+    
+    def rewire(newn, neighbors):
+        for neighbor in neighbors:
+            if neighbor is newn or neighbor is start:
+                continue
+            if neighbor.t <= newn.t:
+                continue
+            if not neighbor.connectsTo(newn):
+                continue
+
+            newCost = newn.cost + newn.distance(neighbor)
+
+            if newCost < neighbor.cost:
+                if neighbor.parent is not None:
+                    visual.drawEdge(neighbor.parent, neighbor, color="yellow", linewidth=1)
+                neighbor.parent = newn
+                neighbor.cost = newCost
+                visual.drawEdge(newn, neighbor, color='g', linewidth=1)
+                updateChildrenCosts(neighbor)
+                visual.show()
+
+    bestGoal = None
+    pathsFound = 0
+
+    while steps < SMAX and len(tree) < NMAX:
+        steps += 1
+
+        if random.random() < GOAL_BIAS:
+            target = goal
+
+        else:
+            target = Node(random.uniform(map.xmin, map.xmax),
+                          random.uniform(map.ymin, map.ymax),
+                          0.0,
+                          map)
+
+        nearest = min(tree, key=lambda n: n.distance(target))
+
+        if random.random() < WAIT_PROB:
+            newn = Node(nearest.x, nearest.y, nearest.t + DT, map)  # wait
+        else:
+            ang = atan2(target.y - nearest.y, target.x - nearest.x)
+            newn = Node(nearest.x + DSTEP*cos(ang),
+                        nearest.y + DSTEP*sin(ang),
+                        nearest.t + DT,
+                        map)
+
+        if not newn.inFreespace():
+            continue
+
+        n = len(tree) + 1
+        radius = max(DSTEP * 2.0, 1.5 * DSTEP * sqrt(np.log(n)/n))
+        neighbors = getNeighbors(newn, radius)
+
+        validParents = []
+        for neighbor in neighbors:
+            if newn.t > neighbor.t and newn.connectsTo(neighbor):
+                validParents.append(neighbor)
+        if nearest not in validParents and newn.t > nearest.t and newn.connectsTo(nearest):
+            validParents.append(nearest)
+        if len(validParents) == 0:
+            continue
+
+        bestParent = min(validParents, key=lambda node: node.cost + node.distance(newn))
+        addToTree(bestParent, newn)
+        rewire(newn, neighbors)
+
+        if newn.distance(goal) < DSTEP:
+            curGoal = Node(goal.x, goal.y, newn.t + DT, map)
+            if curGoal.connectsTo(newn):
+                curGoal.parent = newn
+                curGoal.cost = newn.cost + newn.distance(curGoal)
+
+                if bestGoal is None or curGoal.cost < bestGoal.cost:
+                    bestGoal = curGoal
+                    pathsFound += 1
+                    print("path found")
+                    if pathsFound >= 4:
+                        print("Exiting early since multiple paths found.")
+                        break
+
+        if len(tree) > 10 * ((map.xmax - map.xmin) * (map.ymax - map.ymin)) / (DSTEP ** 2):
+            print("Exiting early due to size of tree.")
+            break
+    
+    if bestGoal is not None:
+        return build_path(bestGoal), tree
+
+    return None, tree
+
 def postProcess(path):
     shortpath = [path[0]]
     for i in range(2, len(path)):
@@ -398,7 +519,7 @@ def main():
         return
 
     print("Planning...")
-    path, tree = rrt(start, goal, visual)
+    path, tree = rrtstar(start, goal, visual)
     path = postProcess(path)
     if path is None:
         print("Failed. Try increasing SMAX/NMAX or WAIT_PROB or gmax.")
