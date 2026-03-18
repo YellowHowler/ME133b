@@ -7,12 +7,14 @@ from math import sqrt, atan2, cos, sin
 from shapely.geometry import Point, LineString, Polygon
 
 # Parameters
-DSTEP = 0.5
+DSTEP = 0.3
 DT = 0.4
 SMAX = 40000
 NMAX = 4000
 
-GOAL_BIAS = 0.06
+CLEARANCE = 0.1
+
+GOAL_BIAS = 0.1
 WAIT_PROB = 0.22  # waiting helps pass through a gap that opens/closes
 
 XMIN, XMAX = 0, 6
@@ -20,6 +22,11 @@ YMIN, YMAX = 0, 7
 
 WALL_THICKNESS = 0.1
 WALL_SPLIT_OMEGA = 0.28
+
+D_ACC_MAX = 0.2
+D_ANG_MAX = 0.5
+ACC_MAX = 0.6
+VEL_MAX = 1.5
 
 ######################################################################
 #
@@ -135,6 +142,9 @@ class Node:
         self.child = None
         self.map = map
         self.cost = 0
+        self.vel = 0
+        self.acc = 0
+        self.ang = 0
 
     def distance(self, other):
         return sqrt((self.x - other.x)**2 + (self.y - other.y)**2)
@@ -148,12 +158,31 @@ class Node:
                 return False
         return True
 
-    def connectsTo(self, other):
+    def connectsTo(self, other, enforceDynamics=False):
         #check wall at time of the new node
         line = LineString([(self.x, self.y), (other.x, other.y)])
         for poly in self.map.polygonsAt(other.t):
             if not poly.disjoint(line):
+                return False     
+            if line.distance(poly) < CLEARANCE:
                 return False
+
+        # check if max velocity / turn direction is violated
+        def wrapTwoPi(angle):
+            return (angle + np.pi) % (2 * np.pi) - np.pi
+
+        if enforceDynamics:
+            dt = other.t - self.t
+            if dt <= 0:
+                return False
+
+            if (self.distance(other) / dt) > VEL_MAX:
+                return False
+
+            ang_diff = wrapTwoPi(other.ang - self.ang)
+            if abs(ang_diff) > D_ANG_MAX:
+                return False
+           
         return True
 
 
@@ -232,7 +261,7 @@ class Visualization:
 
         return px[-1], py[-1]
     
-    def draw_final_snapshot(self, path, tree, start, goal):
+    def draw_final_snapshot(self, path, tree, start, goal, color='red'):
         tf = path[-1].t
         self.drawMap(tf)
 
@@ -243,7 +272,7 @@ class Visualization:
 
         # final path
         for i in range(len(path)-1):
-            self.drawEdge(path[i], path[i+1], color='red', linewidth=3)
+            self.drawEdge(path[i], path[i+1], color=color, linewidth=3)
 
         self.drawStartGoal(start, goal)
         self.show('Final snapshot (hit return to continue)')
@@ -432,10 +461,77 @@ def rrtstar(start, goal, visual):
 
     return None, tree
 
-def postProcess(path):
+# Kinodynamic Temporal RRT
+def kinodynamicrrt(start, goal, visual, startAng=0):
+    map = visual.map
+
+    tree = [start]
+    start.ang = startAng
+    steps = 0
+
+    def addToTree(oldn, newn):
+        newn.parent = oldn
+        tree.append(newn)
+
+        visual.drawEdge(oldn, newn, color='g', linewidth=1)
+        visual.show()
+
+    while steps < SMAX and len(tree) < NMAX:
+        steps += 1
+
+        if random.random() < GOAL_BIAS:
+            target = goal
+        else:
+            target = Node(random.uniform(map.xmin, map.xmax),
+                          random.uniform(map.ymin, map.ymax),
+                          0.0,
+                          map)
+
+        nearest = min(tree, key=lambda n: n.distance(target))
+
+        # choose new acceleration, velocity, and direction
+
+        # newAcc = nearest.acc + random.uniform(-D_ACC_MAX, D_ACC_MAX)
+        # newAcc = max(-ACC_MAX, min(ACC_MAX, newAcc))
+
+        # newVel = nearest.vel + DT*newAcc
+        # newVel = max(-VEL_MAX, min(VEL_MAX, newVel))
+        # newAcc = (newVel - nearest.vel) / DT
+
+        velDes = random.uniform(0.7 * VEL_MAX, VEL_MAX)
+        accCmd = (velDes - nearest.vel) / DT
+        accCmd += random.uniform(-D_ACC_MAX, D_ACC_MAX)
+        accCmd = max(-ACC_MAX, min(ACC_MAX, accCmd))
+
+        newVel = nearest.vel + DT * accCmd
+        newVel = max(0.0, min(VEL_MAX, newVel))
+        newAcc = (newVel - nearest.vel) / DT
+    
+        newAng = (nearest.ang + random.uniform(-D_ANG_MAX, D_ANG_MAX)) % (2 * np.pi)
+        
+        newn = Node(nearest.x + DSTEP*DT*newVel*cos(newAng),
+                    nearest.y + DSTEP*DT*newVel*sin(newAng),
+                    nearest.t + DT,
+                    map)
+        newn.acc = newAcc
+        newn.vel = newVel
+        newn.ang = newAng
+
+        if newn.inFreespace() and newn.connectsTo(nearest):
+            addToTree(nearest, newn)
+
+            if newn.distance(goal) < DSTEP:
+                goal_reached = Node(goal.x, goal.y, newn.t + DT, map)
+                if goal_reached.inFreespace() and goal_reached.connectsTo(newn):
+                    goal_reached.parent = newn
+                    return build_path(goal_reached), tree
+
+    return None, tree
+
+def postProcess(path, enforceDynamics=False):
     shortpath = [path[0]]
     for i in range(2, len(path)):
-        if not shortpath[-1].connectsTo(path[i]):
+        if not shortpath[-1].connectsTo(path[i], enforceDynamics=enforceDynamics):
             shortpath.append(path[i-1])
     shortpath.append(path[-1])
     return shortpath
@@ -519,17 +615,24 @@ def main():
         return
 
     print("Planning...")
-    path, tree = rrtstar(start, goal, visual)
-    path = postProcess(path)
+    path, tree = kinodynamicrrt(start, goal, visual, startAng=np.pi/2)
+    
     if path is None:
         print("Failed. Try increasing SMAX/NMAX or WAIT_PROB or gmax.")
         return
-
+    
     print(f"Path found. tf={path[-1].t:.2f}, nodes={len(tree)}")
 
-    # show final planning map
-    visual.draw_final_snapshot(path, tree, start, goal)
-    input("Final path shown (with wall at final time). Press Enter to animate...")
+    # show final path before post-processing
+    visual.draw_final_snapshot(path, tree, start, goal, color='blue')
+    input("Final path before post-processing shown (with wall at final time).")
+
+    #path = postProcess(path)
+    path = postProcess(path, enforceDynamics=True)
+
+    # show final path after post-processing
+    visual.draw_final_snapshot(path, tree, start, goal, color='green')
+    input("Final path after post-processing shown (with wall at final time). Press Enter to animate...")
     
     # show final animation
     plt.close(visual.fig)
