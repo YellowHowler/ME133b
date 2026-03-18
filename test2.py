@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from matplotlib.patches import Polygon as MplPolygon
+from matplotlib.patches import Patch
 import numpy as np
 import random
 from math import sqrt, atan2, cos, sin
@@ -38,13 +39,18 @@ class Wall:
         self.ymin = ymin
         self.ymax = ymax
     
-    def polygonsAt(self, t):
-        return [Polygon([
+    def polygonsAt(self, t, returnColor=False):
+        poly = Polygon([
             (self.xmin, self.ymin),
             (self.xmax, self.ymin),
             (self.xmax, self.ymax),
             (self.xmin, self.ymax)
-        ])]
+        ])
+
+        if returnColor:
+            return [(poly, 'black')]
+
+        return [poly]
 
 ######################################################################
 #
@@ -61,9 +67,15 @@ class SplitWall(Wall):
         # smooth: 0 -> gapmax -> 0
         return self.gapmax * (np.sin(self.omega * t) ** 2)
 
-    def polygonsAt(self, t):
+    def polygonsAt(self, t, returnColor=False):
         g = self.gap(t)
         polys = []
+
+        def appendPoly(poly):
+            if returnColor:
+                polys.append((poly, 'orange'))
+            else:
+                polys.append(poly)
 
         if self.splitdir == 0: # split in x direction
             xL0 = self.xmin
@@ -76,7 +88,7 @@ class SplitWall(Wall):
             yT = self.ymax
 
             if xR0 > xL0:
-                polys.append(Polygon([
+                appendPoly(Polygon([
                     (xL0, yB),
                     (xR0, yB),
                     (xR0, yT),
@@ -84,7 +96,7 @@ class SplitWall(Wall):
                 ]))
 
             if xR1 > xL1:
-                polys.append(Polygon([
+                appendPoly(Polygon([
                     (xL1, yB),
                     (xR1, yB),
                     (xR1, yT),
@@ -101,7 +113,7 @@ class SplitWall(Wall):
             xR = self.xmax
 
             if yT0 > yB0:
-                polys.append(Polygon([
+                appendPoly(Polygon([
                     (xL, yB0),
                     (xR, yB0),
                     (xR, yT0),
@@ -109,7 +121,7 @@ class SplitWall(Wall):
                 ]))
 
             if yT1 > yB1:
-                polys.append(Polygon([
+                appendPoly(Polygon([
                     (xL, yB1),
                     (xR, yB1),
                     (xR, yT1),
@@ -126,10 +138,10 @@ class Map():
         self.ymin = ymin
         self.ymax = ymax
 
-    def polygonsAt(self, t):
+    def polygonsAt(self, t, returnColor=False):
         polys = []
         for wall in self.walls:
-            polys.extend(wall.polygonsAt(t)) 
+            polys.extend(wall.polygonsAt(t, returnColor=returnColor))
         return polys
 
 # Node
@@ -211,13 +223,19 @@ class Visualization:
         self.ax.set_ylim(self.map.ymin, self.map.ymax)
         self.ax.set_aspect('equal')
 
-        for poly in self.map.polygonsAt(t):
+        for poly, color in self.map.polygonsAt(t, returnColor=True):
             x, y = poly.exterior.xy
             patch = MplPolygon(list(zip(x, y)),
                            closed=True,
-                           facecolor='black',
-                           edgecolor='black')
+                           facecolor=color,
+                           edgecolor=color)
             self.ax.add_patch(patch)
+
+        legend_elements = [
+            Patch(facecolor='black', edgecolor='black', label='Still Wall'),
+            Patch(facecolor='purple', edgecolor='purple', label='Splitting Wall')
+        ]
+        self.ax.legend(handles=legend_elements, loc='upper right')
 
     def show(self, text=''):
         plt.pause(0.001)
