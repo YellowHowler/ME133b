@@ -233,7 +233,7 @@ class Visualization:
 
         legend_elements = [
             Patch(facecolor='black', edgecolor='black', label='Still Wall'),
-            Patch(facecolor='purple', edgecolor='purple', label='Splitting Wall')
+            Patch(facecolor='orange', edgecolor='orange', label='Splitting Wall')
         ]
         self.ax.legend(handles=legend_elements, loc='upper right')
 
@@ -588,7 +588,7 @@ def main():
         return SplitWall(x - WALL_THICKNESS/2, x + WALL_THICKNESS/2, min(y1, y2), max(y1, y2),
                          gappos=(y1+y2)/2, gapmax=1, omega=WALL_SPLIT_OMEGA, splitdir=1)
 
-    walls = [
+    baseMaze = [
         # Outer border
         H(0, 6, 7),
         H(0, 6, 0),
@@ -615,7 +615,40 @@ def main():
         VM(5, 1, 3),
         V(5, 5, 6)
     ]
-    map = Map(walls, XMIN, XMAX, YMIN, YMAX)
+    maneuverMaze = [
+        # Outer border
+        H(0, 5, 5),
+        H(0, 5, 0),
+        V(0, 0, 5),
+        V(5, 0, 5),
+
+        # Inner walls
+        H(0, 3, 1),
+        H(2, 5, 2),
+        H(0, 3, 3),
+        H(2, 5, 4),
+        HM(3, 5, 1),
+        HM(0, 2, 2),
+        HM(3, 5, 3),
+        HM(0, 2, 4),
+    ]
+    deceptiveMaze = [
+        # Outer border
+        H(0, 5, 5),
+        H(0, 5, 0),
+        V(0, 0, 5),
+        V(5, 0, 5),
+
+        # Inner walls
+        H(0, 3, 1),
+        H(1, 4, 2),
+        H(0, 3, 3),
+        H(4, 5, 3),
+        H(1, 4, 4),
+        V(4, 1, 4)
+    ]
+    
+    map = Map(deceptiveMaze, XMIN, XMAX, YMIN, YMAX)
 
     visual = Visualization(map)
 
@@ -633,7 +666,7 @@ def main():
         return
 
     print("Planning...")
-    path, tree = kinodynamicrrt(start, goal, visual, startAng=np.pi/2)
+    path, tree = rrt(start, goal, visual)
     
     if path is None:
         print("Failed. Try increasing SMAX/NMAX or WAIT_PROB or gmax.")
