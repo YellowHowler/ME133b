@@ -8,10 +8,10 @@ from math import sqrt, atan2, cos, sin
 from shapely.geometry import Point, LineString, Polygon
 
 # Parameters
-DSTEP = 0.5
+DSTEP = 0.4
 DT = 0.4
-SMAX = 40000
-NMAX = 4000
+SMAX = 100000
+NMAX = 10000
 
 CLEARANCE = 0.05
 
@@ -22,7 +22,7 @@ XMIN, XMAX = 0, 6
 YMIN, YMAX = 0, 7
 
 WALL_THICKNESS = 0.1
-WALL_SPLIT_OMEGA = 0.28
+WALL_SPLIT_OMEGA = 0.2
 
 D_ACC_MAX = 0.2
 D_ANG_MAX = 0.6
@@ -235,12 +235,8 @@ class Node:
                 dists.append(d)
 
         # no nearby walls
-        if len(dists) == 0:
+        if len(dists) == 0  or len(dists) == 1:
             return 0.5
-
-        # only one nearby wall
-        if len(dists) == 1:
-            return 0.0
 
         dists.sort()
         d1, d2 = dists[0], dists[1]
@@ -551,7 +547,7 @@ def rrtstar(start, goal, visual):
                     bestGoal = curGoal
                     pathsFound += 1
                     print("path found")
-                    if pathsFound >= 4:
+                    if pathsFound >= 3:
                         print("Exiting early since multiple paths found.")
                         break
 
@@ -651,8 +647,37 @@ def kinodynamicrrtModified(start, goal, visual):
         visual.drawEdge(oldn, newn, color='g', linewidth=1)
         visual.show()
 
-    def scoreClearance(node):
-        return node.numCloseWalls(radius=0.3)
+    def nearestScore(n):
+        def wrapToPi(angle):
+            return (angle + np.pi) % (2 * np.pi) - np.pi
+
+        posScore = n.distance(target)
+        targetAng = atan2(target.y - n.y, target.x - n.x)
+        angScore = abs(wrapToPi(targetAng - n.ang))
+        return posScore + 0.5 * angScore
+    
+    def directionalDensityPenalty(baseNode, candAng, tree, radius=2.0, angWidth=np.pi/6):
+        penalty = 0.0
+
+        for other in tree:
+            if other is baseNode:
+                continue
+
+            dx = other.x - baseNode.x
+            dy = other.y - baseNode.y
+            dist = np.hypot(dx, dy)
+
+            if dist < 1e-6 or dist > radius:
+                continue
+
+            angToNode = np.arctan2(dy, dx)
+            angDiff = abs((candAng - angToNode + np.pi) % (2*np.pi) - np.pi)
+
+            if angDiff < angWidth:
+                # closer nodes contribute more
+                penalty += (1.0 - dist / radius) * (1.0 - angDiff / angWidth)
+
+        return penalty
 
     while steps < SMAX and len(tree) < NMAX:
         steps += 1
@@ -665,16 +690,7 @@ def kinodynamicrrtModified(start, goal, visual):
                           0.0,
                           map)
 
-        def nearestScore(n):
-            def wrapToPi(angle):
-                return (angle + np.pi) % (2 * np.pi) - np.pi
-
-            posScore = n.distance(target)
-            targetAng = atan2(target.y - n.y, target.x - n.x)
-            angScore = abs(wrapToPi(targetAng - n.ang))
-            return posScore + 0.5 * angScore
-
-        if random.random() < 0.95:
+        if random.random() < 0.96:
             nearest = min(tree, key=lambda n: nearestScore(n))
         else:
             nearest = random.choice(tree)
@@ -707,20 +723,31 @@ def kinodynamicrrtModified(start, goal, visual):
                 continue
             
             midnessScore = 1 - checkNode.middleAmount(radius=1.5)
-            #narrowScore = checkNode.narrowAmount(radius=0.5)
             distanceScore = np.sqrt(checkNode.distance(target))
 
             corridorScore = np.inf
+            maxNearDis = 0
+            minNearDis = np.inf
 
-            numCheck = 5
+            numCheck = 10
             for i in range(numCheck):
-                alpha = i / numCheck
+                alpha = ((i / numCheck) - 0.5) * 5
                 alphaX = checkNode.x * alpha + nearest.x * (1 - alpha)
                 alphaY = checkNode.y * alpha + nearest.y * (1 - alpha)
                 checkNode2 = Node(alphaX, alphaY, nearest.t + DT, map)
-                corridorScore = min(corridorScore, checkNode2.narrowAmount(0.3))
+                minNearDis = min(minNearDis, checkNode2.narrowAmount(0.5))
+                maxNearDis = max(maxNearDis, checkNode2.nearestDist(0.5))
 
-            score = distanceScore + 7 * corridorScore + 3 * midnessScore + 5 * scoreClearance(checkNode)
+            corridorScore = 1 - (maxNearDis - minNearDis)
+
+            densityScore = directionalDensityPenalty(nearest, candAng, tree, radius=2.0, angWidth=np.pi/5)
+
+            score = (
+                1 * distanceScore
+                + 7 * corridorScore
+                + 5 * midnessScore
+                + 0.25 * densityScore
+            )
             angleScores.append((score, candAng))
 
         if len(angleScores) == 0:
@@ -879,12 +906,23 @@ def main():
         HM(0, 2, 4)
     ]
     
-    map = Map(maneuverMaze, XMIN, XMAX, YMIN, YMAX)
+    # map = Map(deceptiveMaze, XMIN, XMAX, YMIN, YMAX)
+    # start = Node(0.5, 0.5, 0.0, map)
+    # goal  = Node(4.5, 3.5, 0.0, map)
+
+    # map = Map(maneuverMaze, XMIN, XMAX, YMIN, YMAX)
+    # start = Node(0.5, 0.5, 0.0, map)
+    # goal  = Node(4.5, 4.5, 0.0, map)
+
+    # map = Map(corridorMaze, XMIN, XMAX, YMIN, YMAX)
+    # start = Node(1, 0.5, 0.0, map)
+    # goal  = Node(1, 4.5, 0.0, map)
+
+    map = Map(baseMaze, XMIN, XMAX, YMIN, YMAX)
+    start = Node(0.5, 0.5, 0.0, map)
+    goal  = Node(5.5, 5.5, 0.0, map)
 
     visual = Visualization(map)
-
-    start = Node(0.5, 0.5, 0.0, map)
-    goal  = Node(4.5, 4.5, 0.0, map)
 
     visual.drawStartGoal(start, goal)
     visual.show("Showing basic world")
@@ -897,7 +935,7 @@ def main():
         return
 
     print("Planning...")
-    path, tree = kinodynamicrrtModified(start, goal, visual)
+    path, tree = rrt(start, goal, visual)
     
     if path is None:
         print("Failed. Try increasing SMAX/NMAX or WAIT_PROB or gmax.")
