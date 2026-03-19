@@ -278,7 +278,7 @@ class Node:
 
         # no nearby walls
         if len(dists) == 0 or len(dists) == 1:
-            return radius * 1.5
+            return radius * 2
 
         dists.sort()
         return dists[0]
@@ -879,12 +879,12 @@ def main():
         HM(0, 2, 4)
     ]
     
-    map = Map(maneuverMaze, XMIN, XMAX, YMIN, YMAX)
+    map = Map(deceptiveMaze, XMIN, XMAX, YMIN, YMAX)
 
     visual = Visualization(map)
 
     start = Node(0.5, 0.5, 0.0, map)
-    goal  = Node(1, 4.5, 0.0, map)
+    goal  = Node(4.5, 3.5, 0.0, map)
 
     visual.drawStartGoal(start, goal)
     visual.show("Showing basic world")
