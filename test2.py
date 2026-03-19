@@ -631,7 +631,7 @@ def kinodynamicrrtModified(start, goal, visual, startAng=0):
             if not checkNode.connectsTo(nearest):
                 continue
 
-            score = 1.5 * checkNode.distance(target) + checkNode.numCloseWalls(radius=0.3)
+            score = 0.5 * checkNode.distance(target) + checkNode.numCloseWalls(radius=0.3)
             angleScores.append((score, candAng))
 
         if len(angleScores) == 0:
@@ -781,7 +781,7 @@ def main():
         HM(0, 2, 4)
     ]
     
-    map = Map(deceptiveMaze, XMIN, XMAX, YMIN, YMAX)
+    map = Map(baseMaze, XMIN, XMAX, YMIN, YMAX)
 
     visual = Visualization(map)
 
