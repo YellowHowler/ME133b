@@ -546,11 +546,11 @@ def kinodynamicrrt(start, goal, visual, startAng=0):
         velDes = random.uniform(0.7 * VEL_MAX, VEL_MAX)
         accDes = (velDes - nearest.vel) / DT
         accDes = max(-ACC_MAX, min(ACC_MAX, accDes))
-        dAcc = accDes - nearest.acc
+        dAcc = accDes - nearest.acc + random.uniform(-D_ACC_MAX * 0.4, D_ACC_MAX * 0.4)
         dAcc = max(-D_ACC_MAX, min(D_ACC_MAX, dAcc))
         newAcc = nearest.acc + dAcc
         newAcc = max(-ACC_MAX, min(ACC_MAX, newAcc))
-        newVel = nearest.vel + DT * newAcc
+        newVel = nearest.vel + DT * newAcc 
         newVel = max(0.0, min(VEL_MAX, newVel))
     
         newAng = (nearest.ang + random.uniform(-D_ANG_MAX, D_ANG_MAX)) % (2 * np.pi)
@@ -607,11 +607,11 @@ def kinodynamicrrtModified(start, goal, visual, startAng=0):
         velDes = random.uniform(0.7 * VEL_MAX, VEL_MAX)
         accDes = (velDes - nearest.vel) / DT
         accDes = max(-ACC_MAX, min(ACC_MAX, accDes))
-        dAcc = accDes - nearest.acc
+        dAcc = accDes - nearest.acc + random.uniform(-D_ACC_MAX * 0.4, D_ACC_MAX * 0.4)
         dAcc = max(-D_ACC_MAX, min(D_ACC_MAX, dAcc))
         newAcc = nearest.acc + dAcc
         newAcc = max(-ACC_MAX, min(ACC_MAX, newAcc))
-        newVel = nearest.vel + DT * newAcc
+        newVel = nearest.vel + DT * newAcc 
         newVel = max(0.0, min(VEL_MAX, newVel))
 
         # Select the target angle to be angle with the best clearance score
