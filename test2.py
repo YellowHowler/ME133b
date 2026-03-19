@@ -171,14 +171,13 @@ class Node:
         return True
 
     def connectsTo(self, other, enforceDynamics=False):
-        #check wall at time of the new node
-        line = LineString([(self.x, self.y), (other.x, other.y)])
-        for poly in self.map.polygonsAt(other.t):
-            if not poly.disjoint(line):
-                return False     
-            if line.distance(poly) < CLEARANCE:
+        line = LineString([(self.x, self.y), (other.x, other.y)]) 
+        for poly in self.map.polygonsAt(other.t): 
+            if not poly.disjoint(line): 
+                return False 
+            if line.distance(poly) < CLEARANCE: 
                 return False
-
+        
         # check if max velocity / turn direction is violated
         def wrapTwoPi(angle):
             return (angle + np.pi) % (2 * np.pi) - np.pi
@@ -196,7 +195,35 @@ class Node:
                 return False
            
         return True
+    
+    def inOpenSpace(self, other, clearance=CLEARANCE):
+        dt = other.t - self.t
+        if dt <= 0:
+            return False
+        
+        numCheck = 10
+        for i in range(numCheck+1):
+            alpha = i / numCheck
+            x = self.x + alpha * (other.x - self.x)
+            y = self.y + alpha * (other.y - self.y)
+            t = self.t + alpha * dt
 
+            p = Point(x, y)
+            for poly in self.map.polygonsAt(t):
+                if poly.distance(p) < clearance:
+                    return False
+                
+        return True
+    
+    def numCloseWalls(self, radius):
+        count = 0
+        p = Point(self.x, self.y)
+
+        for poly in self.map.polygonsAt(self.t):
+            if poly.distance(p) < radius:
+                count += 1
+
+        return count
 
 ######################################################################
 #
@@ -517,16 +544,108 @@ def kinodynamicrrt(start, goal, visual, startAng=0):
         # newAcc = (newVel - nearest.vel) / DT
 
         velDes = random.uniform(0.7 * VEL_MAX, VEL_MAX)
-        accCmd = (velDes - nearest.vel) / DT
-        accCmd += random.uniform(-D_ACC_MAX, D_ACC_MAX)
-        accCmd = max(-ACC_MAX, min(ACC_MAX, accCmd))
-
-        newVel = nearest.vel + DT * accCmd
+        accDes = (velDes - nearest.vel) / DT
+        accDes = max(-ACC_MAX, min(ACC_MAX, accDes))
+        dAcc = accDes - nearest.acc
+        dAcc = max(-D_ACC_MAX, min(D_ACC_MAX, dAcc))
+        newAcc = nearest.acc + dAcc
+        newAcc = max(-ACC_MAX, min(ACC_MAX, newAcc))
+        newVel = nearest.vel + DT * newAcc
         newVel = max(0.0, min(VEL_MAX, newVel))
-        newAcc = (newVel - nearest.vel) / DT
     
         newAng = (nearest.ang + random.uniform(-D_ANG_MAX, D_ANG_MAX)) % (2 * np.pi)
         
+        newn = Node(nearest.x + DSTEP*DT*newVel*cos(newAng),
+                    nearest.y + DSTEP*DT*newVel*sin(newAng),
+                    nearest.t + DT,
+                    map)
+        newn.acc = newAcc
+        newn.vel = newVel
+        newn.ang = newAng
+
+        if newn.inFreespace() and newn.connectsTo(nearest):
+            addToTree(nearest, newn)
+
+            if newn.distance(goal) < DSTEP:
+                goal_reached = Node(goal.x, goal.y, newn.t + DT, map)
+                if goal_reached.inFreespace() and goal_reached.connectsTo(newn):
+                    goal_reached.parent = newn
+                    return build_path(goal_reached), tree
+
+    return None, tree
+
+def kinodynamicrrtModified(start, goal, visual, startAng=0):
+    map = visual.map
+
+    tree = [start]
+    start.ang = startAng
+    steps = 0
+
+    def addToTree(oldn, newn):
+        newn.parent = oldn
+        tree.append(newn)
+
+        visual.drawEdge(oldn, newn, color='g', linewidth=1)
+        visual.show()
+
+    def scoreClearance(node):
+        return node.numCloseWalls(radius=0.3)
+
+    while steps < SMAX and len(tree) < NMAX:
+        steps += 1
+
+        if random.random() < GOAL_BIAS:
+            target = goal
+        else:
+            target = Node(random.uniform(map.xmin, map.xmax),
+                          random.uniform(map.ymin, map.ymax),
+                          0.0,
+                          map)
+
+        nearest = min(tree, key=lambda n: n.distance(target))
+
+        velDes = random.uniform(0.7 * VEL_MAX, VEL_MAX)
+        accDes = (velDes - nearest.vel) / DT
+        accDes = max(-ACC_MAX, min(ACC_MAX, accDes))
+        dAcc = accDes - nearest.acc
+        dAcc = max(-D_ACC_MAX, min(D_ACC_MAX, dAcc))
+        newAcc = nearest.acc + dAcc
+        newAcc = max(-ACC_MAX, min(ACC_MAX, newAcc))
+        newVel = nearest.vel + DT * newAcc
+        newVel = max(0.0, min(VEL_MAX, newVel))
+
+        # Select the target angle to be angle with the best clearance score
+        angleScores = []
+        numCheck = 12
+
+        for i in range(numCheck):
+            checkOffset = -D_ANG_MAX + 2 * D_ANG_MAX * i / (numCheck - 1)
+            candAng = (nearest.ang + checkOffset) % (2 * np.pi)
+
+            checkX = nearest.x + DSTEP * DT * newVel * cos(candAng)
+            checkY = nearest.y + DSTEP * DT * newVel * sin(candAng)
+            checkNode = Node(checkX, checkY, nearest.t + DT, map)
+
+            if not checkNode.inFreespace():
+                continue
+            if not checkNode.connectsTo(nearest):
+                continue
+
+            score = 1.5 * checkNode.distance(target) + checkNode.numCloseWalls(radius=0.3)
+            angleScores.append((score, candAng))
+
+        if len(angleScores) == 0:
+            continue
+
+        angDes = min(angleScores, key=lambda x: x[0])[1]
+
+        def wrap_to_pi(angle):
+            return (angle + np.pi) % (2 * np.pi) - np.pi
+
+        angErr = wrap_to_pi(angDes - nearest.ang)
+        dAng = max(-D_ANG_MAX, min(D_ANG_MAX, angErr))
+        newAng = (nearest.ang + dAng) % (2 * np.pi)
+
         newn = Node(nearest.x + DSTEP*DT*newVel*cos(newAng),
                     nearest.y + DSTEP*DT*newVel*sin(newAng),
                     nearest.t + DT,
@@ -657,8 +776,8 @@ def main():
 
         # Inner walls
         HM(0, 2, 1),
-        HM(0, 2, 2)
-        HM(0, 2, 3)
+        HM(0, 2, 2),
+        HM(0, 2, 3),
         HM(0, 2, 4)
     ]
     
@@ -680,7 +799,7 @@ def main():
         return
 
     print("Planning...")
-    path, tree = rrt(start, goal, visual)
+    path, tree = kinodynamicrrtModified(start, goal, visual)
     
     if path is None:
         print("Failed. Try increasing SMAX/NMAX or WAIT_PROB or gmax.")
