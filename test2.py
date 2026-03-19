@@ -8,7 +8,7 @@ from math import sqrt, atan2, cos, sin
 from shapely.geometry import Point, LineString, Polygon
 
 # Parameters
-DSTEP = 0.3
+DSTEP = 0.5
 DT = 0.4
 SMAX = 40000
 NMAX = 4000
@@ -631,13 +631,16 @@ def kinodynamicrrtModified(start, goal, visual, startAng=0):
             if not checkNode.connectsTo(nearest):
                 continue
 
-            score = 0.5 * checkNode.distance(target) + checkNode.numCloseWalls(radius=0.3)
+            score = 2.5 * np.sqrt(checkNode.distance(target)) + checkNode.numCloseWalls(radius=0.2)
             angleScores.append((score, candAng))
 
         if len(angleScores) == 0:
             continue
-
-        angDes = min(angleScores, key=lambda x: x[0])[1]
+        
+        if random.random() < 0.5:
+            angDes = min(angleScores, key=lambda x: x[0])[1] + random.uniform(-D_ANG_MAX * 0.4, D_ANG_MAX * 0.4)
+        else:
+            angDes = nearest.ang + random.uniform(-D_ANG_MAX, D_ANG_MAX)
 
         def wrap_to_pi(angle):
             return (angle + np.pi) % (2 * np.pi) - np.pi
@@ -781,12 +784,12 @@ def main():
         HM(0, 2, 4)
     ]
     
-    map = Map(baseMaze, XMIN, XMAX, YMIN, YMAX)
+    map = Map(corridorMaze, XMIN, XMAX, YMIN, YMAX)
 
     visual = Visualization(map)
 
     start = Node(0.5, 0.5, 0.0, map)
-    goal  = Node(4.5, 4.5, 0.0, map)
+    goal  = Node(1, 4.5, 0.0, map)
 
     visual.drawStartGoal(start, goal)
     visual.show("Showing basic world")
