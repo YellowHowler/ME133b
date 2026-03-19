@@ -1,0 +1,424 @@
+
+Benchmarking rrt on corridor maze
+------------------------------------------------------------------------
+Run 01/50: SUCCESS | time = 0.8476s
+Run 02/50: SUCCESS | time = 0.0969s
+Run 03/50: SUCCESS | time = 1.5673s
+Run 04/50: SUCCESS | time = 0.3426s
+Run 05/50: SUCCESS | time = 0.0614s
+Run 06/50: SUCCESS | time = 0.6722s
+Run 07/50: SUCCESS | time = 0.3230s
+Run 08/50: SUCCESS | time = 0.2487s
+Run 09/50: SUCCESS | time = 0.1355s
+Run 10/50: SUCCESS | time = 1.2480s
+Run 11/50: SUCCESS | time = 0.2553s
+Run 12/50: SUCCESS | time = 0.3330s
+Run 13/50: SUCCESS | time = 0.2263s
+Run 14/50: SUCCESS | time = 0.4103s
+Run 15/50: SUCCESS | time = 0.0712s
+Run 16/50: SUCCESS | time = 1.1065s
+Run 17/50: SUCCESS | time = 0.4759s
+Run 18/50: SUCCESS | time = 3.3908s
+Run 19/50: SUCCESS | time = 1.2299s
+Run 20/50: SUCCESS | time = 1.0190s
+Run 21/50: SUCCESS | time = 1.4805s
+Run 22/50: SUCCESS | time = 0.0298s
+Run 23/50: SUCCESS | time = 0.0836s
+Run 24/50: SUCCESS | time = 0.1261s
+Run 25/50: SUCCESS | time = 0.8156s
+Run 26/50: SUCCESS | time = 0.7560s
+Run 27/50: SUCCESS | time = 0.5834s
+Run 28/50: SUCCESS | time = 0.7189s
+Run 29/50: SUCCESS | time = 0.2870s
+Run 30/50: SUCCESS | time = 0.1763s
+Run 31/50: SUCCESS | time = 0.9793s
+Run 32/50: SUCCESS | time = 0.6543s
+Run 33/50: SUCCESS | time = 0.1104s
+Run 34/50: SUCCESS | time = 0.7242s
+Run 35/50: SUCCESS | time = 0.7314s
+Run 36/50: SUCCESS | time = 0.3008s
+Run 37/50: SUCCESS | time = 0.1391s
+Run 38/50: SUCCESS | time = 0.2462s
+Run 39/50: SUCCESS | time = 0.2328s
+Run 40/50: SUCCESS | time = 0.4833s
+Run 41/50: SUCCESS | time = 0.0430s
+Run 42/50: SUCCESS | time = 0.1241s
+Run 43/50: SUCCESS | time = 0.1957s
+Run 44/50: SUCCESS | time = 0.2139s
+Run 45/50: SUCCESS | time = 0.0688s
+Run 46/50: SUCCESS | time = 0.0701s
+Run 47/50: SUCCESS | time = 0.0752s
+Run 48/50: SUCCESS | time = 0.6670s
+Run 49/50: SUCCESS | time = 0.1570s
+Run 50/50: SUCCESS | time = 0.7637s
+
+Summary
+------------------------------------------------------------------------
+Success rate:              100.00%
+Average computing time:    0.5220 s
+Average path length:       6.3998
+Average path final time:   5.2880
+Average total node sampled:454.56
+
+Benchmarking rrt_time on corridor maze
+------------------------------------------------------------------------
+Run 01/50: SUCCESS | time = 0.0542s
+Run 02/50: SUCCESS | time = 0.0246s
+Run 03/50: SUCCESS | time = 0.0300s
+Run 04/50: SUCCESS | time = 0.1583s
+Run 05/50: SUCCESS | time = 0.0207s
+Run 06/50: SUCCESS | time = 0.0489s
+Run 07/50: SUCCESS | time = 0.1102s
+Run 08/50: SUCCESS | time = 0.0384s
+Run 09/50: SUCCESS | time = 0.0412s
+Run 10/50: SUCCESS | time = 0.3380s
+Run 11/50: SUCCESS | time = 0.1566s
+Run 12/50: SUCCESS | time = 0.0306s
+Run 13/50: SUCCESS | time = 0.0613s
+Run 14/50: SUCCESS | time = 0.0568s
+Run 15/50: SUCCESS | time = 0.0512s
+Run 16/50: SUCCESS | time = 0.0636s
+Run 17/50: SUCCESS | time = 0.0461s
+Run 18/50: SUCCESS | time = 0.0424s
+Run 19/50: SUCCESS | time = 0.0203s
+Run 20/50: SUCCESS | time = 0.0444s
+Run 21/50: SUCCESS | time = 0.0165s
+Run 22/50: SUCCESS | time = 0.0311s
+Run 23/50: SUCCESS | time = 0.0785s
+Run 24/50: SUCCESS | time = 0.0531s
+Run 25/50: SUCCESS | time = 0.1183s
+Run 26/50: SUCCESS | time = 0.0073s
+Run 27/50: SUCCESS | time = 0.0577s
+Run 28/50: SUCCESS | time = 0.0222s
+Run 29/50: SUCCESS | time = 0.1492s
+Run 30/50: SUCCESS | time = 0.0945s
+Run 31/50: SUCCESS | time = 0.1667s
+Run 32/50: SUCCESS | time = 0.1648s
+Run 33/50: SUCCESS | time = 0.1188s
+Run 34/50: SUCCESS | time = 0.8833s
+Run 35/50: SUCCESS | time = 0.0088s
+Run 36/50: SUCCESS | time = 0.1308s
+Run 37/50: SUCCESS | time = 0.1523s
+Run 38/50: SUCCESS | time = 0.0602s
+Run 39/50: SUCCESS | time = 0.1260s
+Run 40/50: SUCCESS | time = 0.0106s
+Run 41/50: SUCCESS | time = 0.1517s
+Run 42/50: SUCCESS | time = 1.3006s
+Run 43/50: SUCCESS | time = 0.1710s
+Run 44/50: SUCCESS | time = 0.0854s
+Run 45/50: SUCCESS | time = 0.0658s
+Run 46/50: SUCCESS | time = 0.1352s
+Run 47/50: SUCCESS | time = 0.0766s
+Run 48/50: SUCCESS | time = 0.0250s
+Run 49/50: SUCCESS | time = 0.0271s
+Run 50/50: SUCCESS | time = 0.1106s
+
+Summary
+------------------------------------------------------------------------
+Success rate:              100.00%
+Average computing time:    0.1208 s
+Average path length:       7.6398
+Average path final time:   12.1920
+Average total node sampled:99.22
+
+Benchmarking rrt on deceptive maze
+------------------------------------------------------------------------
+Run 01/50: SUCCESS | time = 0.6533s
+Run 02/50: SUCCESS | time = 0.8723s
+Run 03/50: SUCCESS | time = 0.7400s
+Run 04/50: SUCCESS | time = 0.7753s
+Run 05/50: SUCCESS | time = 0.4589s
+Run 06/50: SUCCESS | time = 0.4794s
+Run 07/50: SUCCESS | time = 0.5613s
+Run 08/50: SUCCESS | time = 0.7349s
+Run 09/50: SUCCESS | time = 0.6236s
+Run 10/50: SUCCESS | time = 0.6809s
+Run 11/50: SUCCESS | time = 0.5399s
+Run 12/50: SUCCESS | time = 0.5728s
+Run 13/50: SUCCESS | time = 0.8655s
+Run 14/50: SUCCESS | time = 0.7859s
+Run 15/50: SUCCESS | time = 0.5482s
+Run 16/50: SUCCESS | time = 0.7114s
+Run 17/50: SUCCESS | time = 0.4993s
+Run 18/50: SUCCESS | time = 0.6996s
+Run 19/50: SUCCESS | time = 0.6600s
+Run 20/50: SUCCESS | time = 0.6974s
+Run 21/50: SUCCESS | time = 0.8426s
+Run 22/50: SUCCESS | time = 0.6991s
+Run 23/50: SUCCESS | time = 1.0293s
+Run 24/50: SUCCESS | time = 0.6204s
+Run 25/50: SUCCESS | time = 0.6997s
+Run 26/50: SUCCESS | time = 0.5773s
+Run 27/50: SUCCESS | time = 0.7291s
+Run 28/50: SUCCESS | time = 0.8248s
+Run 29/50: SUCCESS | time = 0.8479s
+Run 30/50: SUCCESS | time = 0.4897s
+Run 31/50: SUCCESS | time = 0.7458s
+Run 32/50: SUCCESS | time = 0.4622s
+Run 33/50: SUCCESS | time = 0.6089s
+Run 34/50: SUCCESS | time = 0.5038s
+Run 35/50: SUCCESS | time = 0.5359s
+Run 36/50: SUCCESS | time = 0.3257s
+Run 37/50: SUCCESS | time = 0.6383s
+Run 38/50: SUCCESS | time = 0.3689s
+Run 39/50: SUCCESS | time = 0.4824s
+Run 40/50: SUCCESS | time = 0.6743s
+Run 41/50: SUCCESS | time = 0.4437s
+Run 42/50: SUCCESS | time = 0.3582s
+Run 43/50: SUCCESS | time = 0.6394s
+Run 44/50: SUCCESS | time = 0.6330s
+Run 45/50: SUCCESS | time = 0.4748s
+Run 46/50: SUCCESS | time = 0.5394s
+Run 47/50: SUCCESS | time = 0.5551s
+Run 48/50: SUCCESS | time = 0.6053s
+Run 49/50: SUCCESS | time = 0.8014s
+Run 50/50: SUCCESS | time = 0.9612s
+
+Summary
+------------------------------------------------------------------------
+Success rate:              100.00%
+Average computing time:    0.6375 s
+Average path length:       20.0557
+Average path final time:   16.2240
+Average total node sampled:952.46
+
+Benchmarking rrt_time on deceptive maze
+------------------------------------------------------------------------
+Run 01/50: SUCCESS | time = 7.4513s
+Run 02/50: SUCCESS | time = 1.3126s
+Run 03/50: SUCCESS | time = 1.1418s
+Run 04/50: SUCCESS | time = 7.1112s
+Run 05/50: SUCCESS | time = 0.4911s
+Run 06/50: SUCCESS | time = 9.1954s
+Run 07/50: SUCCESS | time = 12.8669s
+Run 08/50: SUCCESS | time = 3.6031s
+Run 09/50: SUCCESS | time = 8.6497s
+Run 10/50: SUCCESS | time = 9.3434s
+Run 11/50: SUCCESS | time = 3.8645s
+Run 12/50: SUCCESS | time = 4.2131s
+Run 13/50: SUCCESS | time = 9.2955s
+Run 14/50: SUCCESS | time = 6.8221s
+Run 15/50: SUCCESS | time = 16.1774s
+Run 16/50: SUCCESS | time = 6.9897s
+Run 17/50: SUCCESS | time = 5.3647s
+Run 18/50: SUCCESS | time = 5.1373s
+Run 19/50: SUCCESS | time = 12.2581s
+Run 20/50: SUCCESS | time = 6.2367s
+Run 21/50: SUCCESS | time = 2.6722s
+Run 22/50: SUCCESS | time = 1.1310s
+Run 23/50: SUCCESS | time = 3.7195s
+Run 24/50: SUCCESS | time = 9.5473s
+Run 25/50: SUCCESS | time = 11.2892s
+Run 26/50: SUCCESS | time = 2.2956s
+Run 27/50: SUCCESS | time = 3.3240s
+Run 28/50: SUCCESS | time = 12.2253s
+Run 29/50: SUCCESS | time = 15.4197s
+Run 30/50: SUCCESS | time = 5.1556s
+Run 31/50: SUCCESS | time = 3.2046s
+Run 32/50: SUCCESS | time = 8.3001s
+Run 33/50: SUCCESS | time = 8.5626s
+Run 34/50: SUCCESS | time = 6.2975s
+Run 35/50: SUCCESS | time = 4.8388s
+Run 36/50: SUCCESS | time = 10.9678s
+Run 37/50: SUCCESS | time = 11.8353s
+Run 38/50: SUCCESS | time = 14.9625s
+Run 39/50: SUCCESS | time = 5.2824s
+Run 40/50: SUCCESS | time = 2.6405s
+Run 41/50: SUCCESS | time = 8.9745s
+Run 42/50: SUCCESS | time = 5.6055s
+Run 43/50: SUCCESS | time = 3.1143s
+Run 44/50: SUCCESS | time = 7.7635s
+Run 45/50: SUCCESS | time = 7.2201s
+Run 46/50: SUCCESS | time = 29.5227s
+Run 47/50: SUCCESS | time = 2.5388s
+Run 48/50: SUCCESS | time = 4.5815s
+Run 49/50: SUCCESS | time = 2.2050s
+Run 50/50: SUCCESS | time = 8.2871s
+
+Summary
+------------------------------------------------------------------------
+Success rate:              100.00%
+Average computing time:    7.2202 s
+Average path length:       23.3944
+Average path final time:   36.2720
+Average total node sampled:3316.26
+
+
+Benchmarking rrt on base maze
+------------------------------------------------------------------------
+Run 01/30: SUCCESS | time = 0.0851s
+Run 02/30: SUCCESS | time = 0.1871s
+Run 03/30: SUCCESS | time = 0.3729s
+Run 04/30: SUCCESS | time = 0.2573s
+Run 05/30: SUCCESS | time = 0.1380s
+Run 06/30: SUCCESS | time = 0.2261s
+Run 07/30: SUCCESS | time = 1.9695s
+Run 08/30: SUCCESS | time = 0.3936s
+Run 09/30: SUCCESS | time = 0.3077s
+Run 10/30: SUCCESS | time = 0.1827s
+Run 11/30: SUCCESS | time = 0.5938s
+Run 12/30: SUCCESS | time = 0.1405s
+Run 13/30: SUCCESS | time = 0.2683s
+Run 14/30: SUCCESS | time = 0.0794s
+Run 15/30: SUCCESS | time = 0.1213s
+Run 16/30: SUCCESS | time = 0.3399s
+Run 17/30: SUCCESS | time = 0.3409s
+Run 18/30: SUCCESS | time = 0.1408s
+Run 19/30: SUCCESS | time = 0.2052s
+Run 20/30: SUCCESS | time = 0.0781s
+Run 21/30: SUCCESS | time = 1.0561s
+Run 22/30: SUCCESS | time = 0.0996s
+Run 23/30: SUCCESS | time = 0.1001s
+Run 24/30: SUCCESS | time = 0.0978s
+Run 25/30: SUCCESS | time = 1.4224s
+Run 26/30: SUCCESS | time = 1.4740s
+Run 27/30: SUCCESS | time = 0.3855s
+Run 28/30: SUCCESS | time = 0.0727s
+Run 29/30: SUCCESS | time = 0.2719s
+Run 30/30: SUCCESS | time = 0.4237s
+
+Summary
+------------------------------------------------------------------------
+Success rate:              100.00%
+Average computing time:    0.3944 s
+Average path length:       12.5342
+Average path final time:   10.2267
+Average total node sampled:358.87
+
+Benchmarking rrt_time on base maze
+------------------------------------------------------------------------
+Run 01/30: SUCCESS | time = 0.9628s
+Run 02/30: SUCCESS | time = 1.0244s
+Run 03/30: SUCCESS | time = 0.2655s
+Run 04/30: SUCCESS | time = 0.3170s
+Run 05/30: SUCCESS | time = 1.8479s
+Run 06/30: SUCCESS | time = 1.1841s
+Run 07/30: SUCCESS | time = 0.1756s
+Run 08/30: SUCCESS | time = 0.3836s
+Run 09/30: SUCCESS | time = 0.4497s
+Run 10/30: SUCCESS | time = 2.2990s
+Run 11/30: SUCCESS | time = 1.7020s
+Run 12/30: SUCCESS | time = 1.2932s
+Run 13/30: SUCCESS | time = 1.0051s
+Run 14/30: SUCCESS | time = 0.2035s
+Run 15/30: SUCCESS | time = 0.5832s
+Run 16/30: SUCCESS | time = 0.3961s
+Run 17/30: SUCCESS | time = 0.6695s
+Run 18/30: SUCCESS | time = 0.4338s
+Run 19/30: SUCCESS | time = 0.1351s
+Run 20/30: SUCCESS | time = 1.7571s
+Run 21/30: SUCCESS | time = 0.3453s
+Run 22/30: SUCCESS | time = 0.2964s
+Run 23/30: SUCCESS | time = 0.3020s
+Run 24/30: SUCCESS | time = 0.4764s
+Run 25/30: SUCCESS | time = 0.4427s
+Run 26/30: SUCCESS | time = 0.8929s
+Run 27/30: SUCCESS | time = 1.4277s
+Run 28/30: SUCCESS | time = 1.3991s
+Run 29/30: SUCCESS | time = 1.6430s
+Run 30/30: SUCCESS | time = 0.7309s
+
+Summary
+------------------------------------------------------------------------
+Success rate:              100.00%
+Average computing time:    0.8348 s
+Average path length:       16.0318
+Average path final time:   23.6800
+Average total node sampled:508.20
+
+Benchmarking rrt on maneuver maze
+------------------------------------------------------------------------
+Run 01/30: SUCCESS | time = 1.1043s
+Run 02/30: SUCCESS | time = 2.8674s
+Run 03/30: SUCCESS | time = 12.2812s
+Run 04/30: SUCCESS | time = 20.5310s
+Run 05/30: SUCCESS | time = 2.2931s
+Run 06/30: SUCCESS | time = 13.3142s
+Run 07/30: SUCCESS | time = 1.0576s
+Run 08/30: SUCCESS | time = 4.0636s
+Run 09/30: SUCCESS | time = 2.2728s
+Run 10/30: SUCCESS | time = 1.5687s
+Run 11/30: SUCCESS | time = 2.9806s
+Run 12/30: SUCCESS | time = 9.3594s
+Run 13/30: SUCCESS | time = 1.1443s
+Run 14/30: SUCCESS | time = 6.5567s
+Run 15/30: SUCCESS | time = 2.2396s
+Run 16/30: SUCCESS | time = 1.0633s
+Run 17/30: SUCCESS | time = 0.8481s
+Run 18/30: SUCCESS | time = 0.6932s
+Run 19/30: SUCCESS | time = 11.3059s
+Run 20/30: SUCCESS | time = 3.5753s
+Run 21/30: SUCCESS | time = 0.9661s
+Run 22/30: SUCCESS | time = 7.7337s
+Run 23/30: SUCCESS | time = 5.2917s
+Run 24/30: SUCCESS | time = 26.2884s
+Run 25/30: SUCCESS | time = 7.3665s
+Run 26/30: SUCCESS | time = 0.6805s
+Run 27/30: SUCCESS | time = 1.3191s
+Run 28/30: SUCCESS | time = 2.1487s
+Run 29/30: SUCCESS | time = 2.5663s
+Run 30/30: SUCCESS | time = 3.3977s
+
+Summary
+------------------------------------------------------------------------
+Success rate:              100.00%
+Average computing time:    5.2960 s
+Average path length:       23.4291
+Average path final time:   18.9467
+Average total node sampled:2969.50
+
+Benchmarking rrt_time on maneuver maze
+------------------------------------------------------------------------
+Run 01/30: SUCCESS | time = 13.7771s
+Run 02/30: SUCCESS | time = 13.4120s
+Run 03/30: SUCCESS | time = 2.3060s
+Run 04/30: TIMEOUT | time = 30.0000s
+Run 05/30: SUCCESS | time = 8.8264s
+Run 06/30: SUCCESS | time = 29.2654s
+Run 07/30: SUCCESS | time = 14.7542s
+Run 08/30: SUCCESS | time = 9.5526s
+Run 09/30: SUCCESS | time = 7.3022s
+Run 10/30: SUCCESS | time = 11.1726s
+Run 11/30: SUCCESS | time = 9.3255s
+Run 12/30: SUCCESS | time = 21.3465s
+Run 13/30: SUCCESS | time = 8.0716s
+Run 14/30: SUCCESS | time = 27.5631s
+Run 15/30: TIMEOUT | time = 30.0000s
+Run 16/30: TIMEOUT | time = 30.0000s
+Run 17/30: SUCCESS | time = 17.5527s
+Run 18/30: TIMEOUT | time = 30.0000s
+Run 19/30: SUCCESS | time = 28.4469s
+Run 20/30: SUCCESS | time = 12.0373s
+Run 21/30: SUCCESS | time = 15.6583s
+Run 22/30: SUCCESS | time = 5.3840s
+Run 23/30: SUCCESS | time = 17.7776s
+Run 24/30: TIMEOUT | time = 30.0000s
+Run 25/30: SUCCESS | time = 12.4832s
+Run 26/30: SUCCESS | time = 26.4584s
+Run 27/30: SUCCESS | time = 5.9680s
+Run 28/30: SUCCESS | time = 6.3071s
+Run 29/30: SUCCESS | time = 7.4423s
+Run 30/30: TIMEOUT | time = 30.0000s
+
+Summary
+------------------------------------------------------------------------
+Success rate:              80.00%
+Average computing time:    17.0730 s
+Average path length:       23.7580
+Average path final time:   36.8000
+Average total node sampled:4340.54
+
+================================================================================================
+FINAL BENCHMARK TABLE
+================================================================================================
+Planner     Maze        Success Rate    Avg Time (s)    Avg Path Len    Avg Final T     Avg Nodes   
+------------------------------------------------------------------------------------------------
+rrt         base        100.00%         0.3944          12.5342         10.2267         358.87      
+rrt_time    base        100.00%         0.8348          16.0318         23.6800         508.20      
+rrt         maneuver    100.00%         5.2960          23.4291         18.9467         2969.50     
+rrt_time    maneuver    80.00%          17.0730         23.7580         36.8000         4340.54 
+rrt         deceptive   100.00%         0.6375          20.0557         16.2240         952.46      
+rrt_time    deceptive   100.00%         7.2202          23.3944         36.2720         3316.26
+rrt         corridor    100.00%         0.5220          6.3998          5.2880          454.56      
+rrt_time    corridor    100.00%         0.1208          7.6398          12.1920         99.22       
+
