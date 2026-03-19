@@ -25,7 +25,7 @@ WALL_THICKNESS = 0.1
 WALL_SPLIT_OMEGA = 0.28
 
 D_ACC_MAX = 0.2
-D_ANG_MAX = 1
+D_ANG_MAX = 0.6
 ACC_MAX = 0.6
 VEL_MAX = 1.5
 
@@ -674,7 +674,7 @@ def kinodynamicrrtModified(start, goal, visual):
             angScore = abs(wrapToPi(targetAng - n.ang))
             return posScore + 0.5 * angScore
 
-        if random.random() < 0.9:
+        if random.random() < 0.95:
             nearest = min(tree, key=lambda n: nearestScore(n))
         else:
             nearest = random.choice(tree)
@@ -720,7 +720,7 @@ def kinodynamicrrtModified(start, goal, visual):
                 checkNode2 = Node(alphaX, alphaY, nearest.t + DT, map)
                 corridorScore = min(corridorScore, checkNode2.narrowAmount(0.3))
 
-            score = distanceScore + 7 * corridorScore + midnessScore + 2 * scoreClearance(checkNode)
+            score = distanceScore + 7 * corridorScore + 3 * midnessScore + 5 * scoreClearance(checkNode)
             angleScores.append((score, candAng))
 
         if len(angleScores) == 0:
@@ -879,12 +879,12 @@ def main():
         HM(0, 2, 4)
     ]
     
-    map = Map(deceptiveMaze, XMIN, XMAX, YMIN, YMAX)
+    map = Map(maneuverMaze, XMIN, XMAX, YMIN, YMAX)
 
     visual = Visualization(map)
 
     start = Node(0.5, 0.5, 0.0, map)
-    goal  = Node(4.5, 3.5, 0.0, map)
+    goal  = Node(4.5, 4.5, 0.0, map)
 
     visual.drawStartGoal(start, goal)
     visual.show("Showing basic world")
