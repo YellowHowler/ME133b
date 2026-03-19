@@ -8,7 +8,7 @@ from math import sqrt, atan2, cos, sin
 from shapely.geometry import Point, LineString, Polygon
 
 # Parameters
-DSTEP = 0.5
+DSTEP = 0.6
 DT = 0.4
 SMAX = 40000
 NMAX = 4000
@@ -574,11 +574,16 @@ def kinodynamicrrt(start, goal, visual, startAng=0):
 
     return None, tree
 
-def kinodynamicrrtModified(start, goal, visual, startAng=0):
+def kinodynamicrrtModified(start, goal, visual):
     map = visual.map
 
-    tree = [start]
-    start.ang = startAng
+    tree = []
+    numStartAngs = 8
+    for i in range(numStartAngs):
+        ang = 2*np.pi*i/numStartAngs
+        s = Node(start.x, start.y, start.t, map)
+        s.ang = ang
+        tree.append(s)
     steps = 0
 
     def addToTree(oldn, newn):
