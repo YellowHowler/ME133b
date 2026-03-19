@@ -8,12 +8,12 @@ from math import sqrt, atan2, cos, sin
 from shapely.geometry import Point, LineString, Polygon
 
 # Parameters
-DSTEP = 0.6
+DSTEP = 0.5
 DT = 0.4
 SMAX = 40000
 NMAX = 4000
 
-CLEARANCE = 0.1
+CLEARANCE = 0.05
 
 GOAL_BIAS = 0.1
 WAIT_PROB = 0.22  # waiting helps pass through a gap that opens/closes
@@ -25,7 +25,7 @@ WALL_THICKNESS = 0.1
 WALL_SPLIT_OMEGA = 0.28
 
 D_ACC_MAX = 0.2
-D_ANG_MAX = 0.5
+D_ANG_MAX = 1
 ACC_MAX = 0.6
 VEL_MAX = 1.5
 
@@ -224,6 +224,64 @@ class Node:
                 count += 1
 
         return count
+    
+    def middleAmount(self, radius):
+        p = Point(self.x, self.y)
+        dists = []
+
+        for poly in self.map.polygonsAt(self.t):
+            d = poly.distance(p)
+            if d < radius:
+                dists.append(d)
+
+        # no nearby walls
+        if len(dists) == 0:
+            return 0.5
+
+        # only one nearby wall
+        if len(dists) == 1:
+            return 0.0
+
+        dists.sort()
+        d1, d2 = dists[0], dists[1]
+        midness = d1 / (d2 + 1e-6)
+
+        return midness
+    
+    def narrowAmount(self, radius):
+        p = Point(self.x, self.y)
+        dists = []
+
+        for poly in self.map.polygonsAt(self.t):
+            d = poly.distance(p)
+            if d < radius:
+                dists.append(d)
+
+        # no nearby walls
+        if len(dists) == 0 or len(dists) == 1:
+            return 0.9
+
+        dists.sort()
+        d1, d2 = dists[0], dists[1]
+
+        narrowness = max(d1, d2)
+        return narrowness
+    
+    def nearestDist(self, radius):
+        p = Point(self.x, self.y)
+        dists = []
+
+        for poly in self.map.polygonsAt(self.t):
+            d = poly.distance(p)
+            if d < radius:
+                dists.append(d)
+
+        # no nearby walls
+        if len(dists) == 0 or len(dists) == 1:
+            return radius * 1.5
+
+        dists.sort()
+        return dists[0]
 
 ######################################################################
 #
@@ -607,7 +665,19 @@ def kinodynamicrrtModified(start, goal, visual):
                           0.0,
                           map)
 
-        nearest = min(tree, key=lambda n: n.distance(target))
+        def nearestScore(n):
+            def wrapToPi(angle):
+                return (angle + np.pi) % (2 * np.pi) - np.pi
+
+            posScore = n.distance(target)
+            targetAng = atan2(target.y - n.y, target.x - n.x)
+            angScore = abs(wrapToPi(targetAng - n.ang))
+            return posScore + 0.5 * angScore
+
+        if random.random() < 0.9:
+            nearest = min(tree, key=lambda n: nearestScore(n))
+        else:
+            nearest = random.choice(tree)
 
         velDes = random.uniform(0.7 * VEL_MAX, VEL_MAX)
         accDes = (velDes - nearest.vel) / DT
@@ -635,15 +705,29 @@ def kinodynamicrrtModified(start, goal, visual):
                 continue
             if not checkNode.connectsTo(nearest):
                 continue
+            
+            midnessScore = 1 - checkNode.middleAmount(radius=1.5)
+            #narrowScore = checkNode.narrowAmount(radius=0.5)
+            distanceScore = np.sqrt(checkNode.distance(target))
 
-            score = 2.5 * np.sqrt(checkNode.distance(target)) + checkNode.numCloseWalls(radius=0.2)
+            corridorScore = np.inf
+
+            numCheck = 5
+            for i in range(numCheck):
+                alpha = i / numCheck
+                alphaX = checkNode.x * alpha + nearest.x * (1 - alpha)
+                alphaY = checkNode.y * alpha + nearest.y * (1 - alpha)
+                checkNode2 = Node(alphaX, alphaY, nearest.t + DT, map)
+                corridorScore = min(corridorScore, checkNode2.narrowAmount(0.3))
+
+            score = distanceScore + 7 * corridorScore + midnessScore + 2 * scoreClearance(checkNode)
             angleScores.append((score, candAng))
 
         if len(angleScores) == 0:
             continue
         
-        if random.random() < 0.5:
-            angDes = min(angleScores, key=lambda x: x[0])[1] + random.uniform(-D_ANG_MAX * 0.4, D_ANG_MAX * 0.4)
+        if random.random() < 0.9:
+            angDes = min(angleScores, key=lambda x: x[0])[1] + random.uniform(-D_ANG_MAX * 0.2, D_ANG_MAX * 0.2)
         else:
             angDes = nearest.ang + random.uniform(-D_ANG_MAX, D_ANG_MAX)
 
@@ -654,13 +738,19 @@ def kinodynamicrrtModified(start, goal, visual):
         dAng = max(-D_ANG_MAX, min(D_ANG_MAX, angErr))
         newAng = (nearest.ang + dAng) % (2 * np.pi)
 
-        newn = Node(nearest.x + DSTEP*DT*newVel*cos(newAng),
-                    nearest.y + DSTEP*DT*newVel*sin(newAng),
-                    nearest.t + DT,
-                    map)
-        newn.acc = newAcc
-        newn.vel = newVel
-        newn.ang = newAng
+        if random.random() < WAIT_PROB:
+            newn = Node(nearest.x, nearest.y, nearest.t + DT, map)  # wait
+            newn.acc = 0
+            newn.vel = 0
+            newn.ang = nearest.ang
+        else:
+            newn = Node(nearest.x + DSTEP*DT*newVel*cos(newAng),
+                        nearest.y + DSTEP*DT*newVel*sin(newAng),
+                        nearest.t + DT,
+                        map)
+            newn.acc = newAcc
+            newn.vel = newVel
+            newn.ang = newAng
 
         if newn.inFreespace() and newn.connectsTo(nearest):
             addToTree(nearest, newn)
@@ -789,7 +879,7 @@ def main():
         HM(0, 2, 4)
     ]
     
-    map = Map(corridorMaze, XMIN, XMAX, YMIN, YMAX)
+    map = Map(maneuverMaze, XMIN, XMAX, YMIN, YMAX)
 
     visual = Visualization(map)
 
