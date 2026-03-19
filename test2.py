@@ -647,6 +647,20 @@ def main():
         H(1, 4, 4),
         V(4, 1, 4)
     ]
+
+    corridorMaze = [
+        # Outer border
+        H(0, 2, 5),
+        H(0, 2, 0),
+        V(0, 0, 5),
+        V(2, 0, 5),
+
+        # Inner walls
+        HM(0, 2, 1),
+        HM(0, 2, 2)
+        HM(0, 2, 3)
+        HM(0, 2, 4)
+    ]
     
     map = Map(deceptiveMaze, XMIN, XMAX, YMIN, YMAX)
 
